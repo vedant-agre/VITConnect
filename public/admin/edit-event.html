@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Event - VITConnect Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container" style="max-width: 100%; padding: 0 2rem;">
+            <a href="/admin/dashboard.html" class="logo">VITConnect Admin</a>
+            <ul class="nav-links">
+                <li><a href="/admin/dashboard.html">Back to Dashboard</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 4rem 0; max-width: 800px;">
+        <h1 id="form-title" style="margin-bottom: 2rem;">Create New Event</h1>
+        <div class="card">
+            <form id="event-form">
+                <input type="hidden" name="id" id="event-id">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Event Title</label>
+                        <input type="text" name="title" id="e-title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="datetime-local" name="date" id="e-date" class="form-input" required>
+                    </div>
+                </div>
+                 <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Venue</label>
+                        <input type="text" name="venue" id="e-venue" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Organizer</label>
+                        <input type="text" name="organizer" id="e-organizer" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" id="e-desc" class="form-textarea" rows="4" required></textarea>
+                </div>
+                <div class="grid-2">
+                     <div class="form-group">
+                        <label class="form-label">Event Poster</label>
+                        <input type="file" name="image" id="e-image" class="form-input">
+                        <small style="color: var(--text-secondary)">Leave empty to keep existing if editing</small>
+                    </div>
+                     <div class="form-group">
+                        <label class="form-label">Featured Event</label>
+                        <select name="featured" id="e-featured" class="form-select">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary">Save Event</button>
+                    <a href="/admin/dashboard.html" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('id');
+
+        async function initPage() {
+            if (!user || user.role !== 'admin') {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            if (eventId) {
+                document.getElementById('form-title').innerText = 'Edit Event';
+                await loadEventDetails(eventId);
+            }
+        }
+
+        async function loadEventDetails(id) {
+            try {
+                const res = await fetch(`/api/events/${id}`);
+                const event = await res.json();
+                
+                document.getElementById('event-id').value = event._id;
+                document.getElementById('e-title').value = event.title;
+                document.getElementById('e-desc').value = event.description;
+                document.getElementById('e-venue').value = event.venue;
+                document.getElementById('e-organizer').value = event.organizer;
+                document.getElementById('e-featured').value = event.featured;
+                
+                const date = new Date(event.date);
+                date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+                document.getElementById('e-date').value = date.toISOString().slice(0, 16);
+            } catch (error) {
+                alert('Error loading event details');
+            }
+        }
+
+        const form = document.getElementById('event-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const id = document.getElementById('event-id').value;
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/events/${id}` : '/api/events';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    body: formData 
+                });
+
+                if (res.ok) {
+                    alert('Event saved successfully');
+                    window.location.href = '/admin/dashboard.html';
+                } else {
+                    const data = await res.json();
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error saving event');
+            }
+        });
+    </script>
+</body>
+</html>

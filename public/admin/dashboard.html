@@ -109,57 +109,8 @@
                 </div>
             </div>
 
-            <!-- Create/Edit Event View -->
-            <div id="create-view" class="hidden">
-                <h1 id="form-title" style="margin-bottom: 2rem;">Create New Event</h1>
-                <div class="card">
-                    <form id="event-form">
-                        <input type="hidden" name="id" id="event-id">
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label class="form-label">Event Title</label>
-                                <input type="text" name="title" id="e-title" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Date</label>
-                                <input type="datetime-local" name="date" id="e-date" class="form-input" required>
-                            </div>
-                        </div>
-                         <div class="grid-2">
-                            <div class="form-group">
-                                <label class="form-label">Venue</label>
-                                <input type="text" name="venue" id="e-venue" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Organizer</label>
-                                <input type="text" name="organizer" id="e-organizer" class="form-input" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" id="e-desc" class="form-textarea" rows="4" required></textarea>
-                        </div>
-                        <div class="grid-2">
-                             <div class="form-group">
-                                <label class="form-label">Event Poster</label>
-                                <input type="file" name="image" id="e-image" class="form-input">
-                                <small style="color: var(--text-secondary)">Leave empty to keep existing if editing</small>
-                            </div>
-                             <div class="form-group">
-                                <label class="form-label">Featured Event</label>
-                                <select name="featured" id="e-featured" class="form-select">
-                                    <option value="false">No</option>
-                                    <option value="true">Yes</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 1rem;">
-                            <button type="submit" class="btn btn-primary">Save Event</button>
-                            <button type="button" onclick="showView('events-view')" class="btn btn-outline">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+            <!-- Create/Edit Event View (Moved to edit-event.html) -->
+            <!-- <div id="create-view"></div> -->
         </main>
     </div>
 
@@ -198,7 +149,7 @@
                         <td>${new Date(event.date).toLocaleDateString()}</td>
                         <td>${event.featured ? '<span style="color: var(--success)">Yes</span>' : 'No'}</td>
                         <td>
-                            <button onclick="editEvent('${event._id}')" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.5rem;">Edit</button>
+                            <a href="/admin/edit-event.html?id=${event._id}" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.5rem; display: inline-block;">Edit</a>
                             <button onclick="viewRegistrations('${event._id}')" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.5rem;">View Reg</button>
                             <button onclick="deleteEvent('${event._id}')" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Delete</button>
                         </td>
@@ -210,48 +161,13 @@
         }
 
         function showView(viewId) {
+            if (viewId === 'create-view') {
+                window.location.href = '/admin/edit-event.html';
+                return;
+            }
             document.querySelectorAll('.main-content > div').forEach(div => div.classList.add('hidden'));
             document.getElementById(viewId).classList.remove('hidden');
-            
-            // Reset form if create view
-            if (viewId === 'create-view') {
-                if (document.getElementById('event-id').value === '') {
-                    document.getElementById('event-form').reset();
-                    document.getElementById('form-title').innerText = 'Create New Event';
-                }
-            } else {
-                 // Clear edit state
-                 document.getElementById('event-id').value = '';
-            }
         }
-
-        const form = document.getElementById('event-form');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const id = document.getElementById('event-id').value;
-            const method = id ? 'PUT' : 'POST';
-            const url = id ? `/api/events/${id}` : '/api/events';
-
-            try {
-                const res = await fetch(url, {
-                    method: method,
-                    body: formData // Send as FormData for file upload
-                });
-
-                if (res.ok) {
-                    alert('Event saved successfully');
-                    showView('events-view');
-                    loadEventsTable();
-                } else {
-                    const data = await res.json();
-                    alert(data.message);
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Error saving event');
-            }
-        });
 
         async function deleteEvent(id) {
             if (!confirm('Are you sure you want to delete this event?')) return;
@@ -263,28 +179,7 @@
             }
         }
 
-        async function editEvent(id) {
-            try {
-                const res = await fetch(`/api/events/${id}`);
-                const event = await res.json();
-                
-                document.getElementById('event-id').value = event._id;
-                document.getElementById('e-title').value = event.title;
-                document.getElementById('e-desc').value = event.description;
-                document.getElementById('e-venue').value = event.venue;
-                document.getElementById('e-organizer').value = event.organizer;
-                document.getElementById('e-featured').value = event.featured;
-                // Date formatting for datetime-local input
-                const date = new Date(event.date);
-                date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-                document.getElementById('e-date').value = date.toISOString().slice(0, 16);
-                
-                document.getElementById('form-title').innerText = 'Edit Event';
-                showView('create-view');
-            } catch (error) {
-                alert('Error loading event details');
-            }
-        }
+        // editEvent and form submission logic moved to edit-event.html
 
         async function viewRegistrations(id) {
             document.getElementById('reg-modal').style.display = 'flex';
