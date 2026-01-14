@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+    <div class="bg-decoration"></div>
     <nav class="navbar">
         <div class="container nav-container">
             <a href="/" class="logo">VITConnect</a>
@@ -16,8 +17,8 @@
         </div>
     </nav>
 
-    <div class="container" style="padding: 2rem 0;">
-        <h1 style="margin-bottom: 2rem;">My Registrations</h1>
+    <div class="container" style="padding: 4rem 0;">
+        <h1 class="section-title">My Registrations</h1>
         <div id="registration-list" class="grid-3">
              <div style="color: var(--text-secondary);">Loading...</div>
         </div>
@@ -75,15 +76,15 @@
             }
 
             container.innerHTML = regs.map(reg => `
-                <div class="card">
+                <div class="card fade-in-up">
                     <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">${reg.event.title}</h3>
                     <p style="color: var(--text-secondary); font-size: 0.9rem;">
                         📅 ${new Date(reg.event.date).toLocaleDateString()}<br>
                         📍 ${reg.event.venue}
                     </p>
                     <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                        <span style="background: var(--success); color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem;">Registered</span>
-                        <span style="color: var(--text-secondary); font-size: 0.8rem; float: right;">On: ${new Date(reg.registrationDate).toLocaleDateString()}</span>
+                        <span style="background: var(--success); color: white; padding: 0.2rem 0.6rem; border-radius: 99px; font-size: 0.8rem; font-weight: 500;">Registered</span>
+                        <span style="color: var(--text-secondary); font-size: 0.8rem; float: right; margin-top: 0.1rem;">On: ${new Date(reg.registrationDate).toLocaleDateString()}</span>
                     </div>
                 </div>
             `).join('');

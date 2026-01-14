@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+    <div class="bg-decoration"></div>
     <nav class="navbar">
         <div class="container nav-container">
             <a href="/" class="logo">VITConnect</a>
@@ -16,12 +17,11 @@
         </div>
     </nav>
 
-    <div class="container" style="padding: 2rem 0;">
+    <div class="container" style="padding: 4rem 0;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-            <h1>Upcoming Events</h1>
+            <h1 class="section-title" style="margin-bottom: 0;">Upcoming Events</h1>
             <div style="display: flex; gap: 1rem;">
                 <input type="text" id="search-input" placeholder="Search events..." class="form-input" style="width: 250px;">
-                <!-- <button class="btn btn-primary" onclick="searchEvents()">Search</button> -->
             </div>
         </div>
 
@@ -55,24 +55,27 @@
             const container = document.getElementById('events-grid');
             
             if (events.length === 0) {
-                container.innerHTML = '<p>No events found.</p>';
+                container.innerHTML = '<p style="color: var(--text-secondary)">No events found.</p>';
                 return;
             }
 
             container.innerHTML = events.map(event => `
-                <div class="card">
-                    <img src="${event.image}" alt="${event.title}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                        <h3 style="font-size: 1.25rem;">${event.title}</h3>
-                        ${event.featured ? '<span style="background: var(--accent); font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 4px;">Featured</span>' : ''}
+                <div class="card fade-in-up">
+                    <div class="card-image-wrapper">
+                         <img src="${event.image}" alt="${event.title}">
+                         <div class="card-date">${new Date(event.date).toLocaleDateString()}</div>
                     </div>
-                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
-                        <p>📅 ${new Date(event.date).toLocaleDateString()} &bull; 📍 ${event.venue}</p>
+                    <div class="card-content">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <h3>${event.title}</h3>
+                            ${event.featured ? '<span style="background: var(--accent); font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 99px;">Featured</span>' : ''}
+                        </div>
+                        <p class="venue-text">${event.venue}</p>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.95rem;">
+                            ${event.description}
+                        </p>
+                        <a href="/events.html?id=${event._id}" class="btn btn-outline full-width">View & Register</a>
                     </div>
-                    <p style="color: #cbd5e1; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                        ${event.description}
-                    </p>
-                    <a href="/event.html?id=${event._id}" class="btn btn-outline" style="width: 100%; text-align: center;">View & Register</a>
                 </div>
             `).join('');
         }

@@ -6,31 +6,147 @@
     <title>VITConnect - Campus Event Portal</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
+        /* Import Font */
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+        /* Hero Specifics */
         .hero {
-            padding: 4rem 0;
+            padding: 8rem 0 6rem 0;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
         .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, var(--accent), #60a5fa);
-            /* -webkit-background-clip: text; */
-            -webkit-text-fill-color: transparent;
+            font-size: 4.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            animation: fadeIn 0.8s ease-out;
         }
+
+        .gradient-text {
+            background: linear-gradient(to right, #60a5fa, var(--accent), var(--secondary-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: gradient-x 4s linear infinite;
+        }
+
+        .hero-subtitle {
+            font-size: 1.4rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeIn 0.8s ease-out 0.2s backwards;
+        }
+
+        .pulse-anim {
+            animation: fadeIn 0.8s ease-out 0.4s backwards, float 3s ease-in-out infinite;
+        }
+
+        /* Carousel/Cards Specifics */
         .carousel {
             display: flex;
             overflow-x: auto;
-            gap: 1.5rem;
-            padding: 1rem 0 2rem 0;
+            gap: 2rem;
+            padding: 1rem 0 3rem 0;
             scroll-snap-type: x mandatory;
+            scrollbar-width: none; /* Firefox */
         }
+        .carousel::-webkit-scrollbar { display: none; }
+
         .carousel-item {
-            min-width: 300px;
+            min-width: 320px;
             scroll-snap-align: start;
+        }
+
+        .card-image-wrapper {
+            position: relative;
+            height: 200px;
+            border-radius: 1rem;
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+        }
+
+        .card-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-date {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-content h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .venue-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .full-width {
+            width: 100%;
+            text-align: center;
+        }
+
+        footer {
+            margin-top: 6rem; 
+            padding: 3rem 0; 
+            text-align: center; 
+            color: var(--text-secondary); 
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* Bg decoration */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -10;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.08) 0%, transparent 25%);
         }
     </style>
 </head>
 <body>
+    <div class="bg-decoration"></div>
     <nav class="navbar">
         <div class="container nav-container">
             <a href="/" class="logo">VITConnect</a>
@@ -41,24 +157,26 @@
     </nav>
 
     <header class="hero">
-        <div class="container">
-            <h1 >Discover Campus Events</h1>
-            <p style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 2rem;">
-                The one-stop platform for all student activities, workshops, and hackathons.
-            </p>
-            <a href="/events.html" class="btn btn-primary">Browse All Events</a>
+        <div class="container hero-content">
+            <div class="hero-text-wrapper">
+                <h1>Discover Campus <span class="gradient-text">Events</span></h1>
+                <p class="hero-subtitle">
+                    The one-stop platform for all student activities, workshops, and hackathons.
+                </p>
+                <a href="/events.html" class="btn btn-primary pulse-anim">Browse All Events</a>
+            </div>
         </div>
     </header>
 
     <main class="container">
-        <h2 style="margin-bottom: 1.5rem; border-left: 4px solid var(--accent); padding-left: 1rem;">Featured Events</h2>
+        <h2 class="section-title">Featured Events</h2>
         <div id="featured-events" class="carousel">
             <!-- Populated by JS -->
             <div style="color: var(--text-secondary);">Loading featured events...</div>
         </div>
     </main>
 
-    <footer style="margin-top: 4rem; padding: 2rem 0; text-align: center; color: var(--text-secondary); border-top: 1px solid var(--border-color);">
+    <footer>
         <p>&copy; 2026 VITConnect. Built for ASEP 3.0</p>
     </footer>
 
@@ -75,17 +193,21 @@
                 const container = document.getElementById('featured-events');
 
                 if (events.length === 0) {
-                    container.innerHTML = '<p>No featured events at the moment.</p>';
+                    container.innerHTML = '<p style="color: var(--text-secondary)">No featured events at the moment.</p>';
                     return;
                 }
 
                 container.innerHTML = events.map(event => `
-                    <div class="card carousel-item">
-                        <img src="${event.image}" alt="${event.title}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem;">
-                        <span style="font-size: 0.8rem; background: var(--accent); padding: 0.2rem 0.5rem; border-radius: 0.25rem;">${new Date(event.date).toLocaleDateString()}</span>
-                        <h3 style="margin: 0.5rem 0;">${event.title}</h3>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">${event.venue}</p>
-                        <a href="/events.html?id=${event._id}" class="btn btn-outline" style="width: 100%; text-align: center;">View Details</a>
+                    <div class="card carousel-item fade-in-up">
+                        <div class="card-image-wrapper">
+                             <img src="${event.image}" alt="${event.title}">
+                             <div class="card-date">${new Date(event.date).toLocaleDateString()}</div>
+                        </div>
+                        <div class="card-content">
+                            <h3>${event.title}</h3>
+                            <p class="venue-text">${event.venue}</p>
+                            <a href="/events.html?id=${event._id}" class="btn btn-outline full-width">View Details</a>
+                        </div>
                     </div>
                 `).join('');
             } catch (error) {
