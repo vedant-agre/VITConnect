@@ -40,27 +40,15 @@
         }
 
         async function loadRegistrations() {
-            // We need a route for this? The plan didn't explicitly say "Get My Registrations".
-            // But we can add it or repurpose an existing one.
-            // Wait, I didn't create a "Get My Registrations" endpoint in the backend. 
-            // I only created "Get Event Registrations (Admin)".
-            // I should add `GET /api/auth/registrations` or `/api/events/myregistrations`.
-            // Ideally `GET /api/users/registrations` or something.
-            // Let's quickly add a route to `authRoutes.js` or `eventController.js`.
-            // Adding a method to `eventController.js` and route to `eventRoutes.js`.
-            
-            // For now, I will add the method to the controller and re-upload it.
-            // Actually, I can just use `fetch('/api/events?registered=true')` if I had checking logic, but I don't.
-            // I will modify `backend/controllers/authController.js` to include `getMyRegistrations`? 
-            // Or `backend/controllers/eventController.js`.
-            // Let's add it to `eventController.js` as `getMyRegistrations`.
-            
             try {
                 const res = await fetch('/api/events/my/registrations');
                 if (!res.ok) {
-                    throw new Error('Failed to fetch');
+                    const errText = await res.text();
+                    console.error('Fetch error:', errText);
+                    throw new Error('Failed to fetch: ' + errText);
                 }
                 const registrations = await res.json();
+                console.log('Frontend fetched registrations:', registrations);
                 renderRegistrations(registrations);
             } catch (error) {
                 console.error(error);
@@ -75,7 +63,9 @@
                 return;
             }
 
-            container.innerHTML = regs.map(reg => `
+            container.innerHTML = regs.map(reg => {
+                if (!reg.event) return ''; // Skip orphaned registrations
+                return `
                 <div class="card fade-in-up">
                     <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">${reg.event.title}</h3>
                     <p style="color: var(--text-secondary); font-size: 0.9rem;">
@@ -87,7 +77,7 @@
                         <span style="color: var(--text-secondary); font-size: 0.8rem; float: right; margin-top: 0.1rem;">On: ${new Date(reg.registrationDate).toLocaleDateString()}</span>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
     </script>
 </body>

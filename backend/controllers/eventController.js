@@ -162,8 +162,10 @@ exports.registerForEvent = async (req, res) => {
 exports.getMyRegistrations = async (req, res) => {
     try {
         const studentId = req.session.user.id;
+        console.log('Fetching registrations for student:', studentId);
         const registrations = await Registration.find({ student: studentId })
             .populate('event', 'title date venue'); // Populate event details
+        console.log('Found registrations:', registrations);
         res.json(registrations);
     } catch (error) {
         console.error(error);
