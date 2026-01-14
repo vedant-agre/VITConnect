@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - VITConnect</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="logo">VITConnect</a>
+            <ul class="nav-links">
+                <!-- Populated by main.js -->
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 2rem 0;">
+        <h1 style="margin-bottom: 2rem;">My Registrations</h1>
+        <div id="registration-list" class="grid-3">
+             <div style="color: var(--text-secondary);">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Same script to load registrations -->
+    <script src="/js/main.js"></script>
+    <script>
+        async function initPage() {
+            if (!user) {
+                window.location.href = '/login.html';
+                return;
+            }
+             if (user.role === 'admin') {
+                window.location.href = '/admin/dashboard.html';
+                return;
+            }
+            loadRegistrations();
+        }
+
+        async function loadRegistrations() {
+            // We need a route for this? The plan didn't explicitly say "Get My Registrations".
+            // But we can add it or repurpose an existing one.
+            // Wait, I didn't create a "Get My Registrations" endpoint in the backend. 
+            // I only created "Get Event Registrations (Admin)".
+            // I should add `GET /api/auth/registrations` or `/api/events/myregistrations`.
+            // Ideally `GET /api/users/registrations` or something.
+            // Let's quickly add a route to `authRoutes.js` or `eventController.js`.
+            // Adding a method to `eventController.js` and route to `eventRoutes.js`.
+            
+            // For now, I will add the method to the controller and re-upload it.
+            // Actually, I can just use `fetch('/api/events?registered=true')` if I had checking logic, but I don't.
+            // I will modify `backend/controllers/authController.js` to include `getMyRegistrations`? 
+            // Or `backend/controllers/eventController.js`.
+            // Let's add it to `eventController.js` as `getMyRegistrations`.
+            
+            try {
+                const res = await fetch('/api/events/my/registrations');
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const registrations = await res.json();
+                renderRegistrations(registrations);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('registration-list').innerHTML = '<p>No registrations found or error loading.</p>';
+            }
+        }
+
+        function renderRegistrations(regs) {
+            const container = document.getElementById('registration-list');
+            if (regs.length === 0) {
+                container.innerHTML = '<p>You have not registered for any events yet.</p>';
+                return;
+            }
+
+            container.innerHTML = regs.map(reg => `
+                <div class="card">
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">${reg.event.title}</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                        📅 ${new Date(reg.event.date).toLocaleDateString()}<br>
+                        📍 ${reg.event.venue}
+                    </p>
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                        <span style="background: var(--success); color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem;">Registered</span>
+                        <span style="color: var(--text-secondary); font-size: 0.8rem; float: right;">On: ${new Date(reg.registrationDate).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

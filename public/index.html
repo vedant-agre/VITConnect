@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VITConnect - Campus Event Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--accent), #60a5fa);
+            /* -webkit-background-clip: text; */
+            -webkit-text-fill-color: transparent;
+        }
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 1.5rem;
+            padding: 1rem 0 2rem 0;
+            scroll-snap-type: x mandatory;
+        }
+        .carousel-item {
+            min-width: 300px;
+            scroll-snap-align: start;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="logo">VITConnect</a>
+            <ul class="nav-links">
+                <!-- Populated by main.js -->
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <h1 >Discover Campus Events</h1>
+            <p style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 2rem;">
+                The one-stop platform for all student activities, workshops, and hackathons.
+            </p>
+            <a href="/events.html" class="btn btn-primary">Browse All Events</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2 style="margin-bottom: 1.5rem; border-left: 4px solid var(--accent); padding-left: 1rem;">Featured Events</h2>
+        <div id="featured-events" class="carousel">
+            <!-- Populated by JS -->
+            <div style="color: var(--text-secondary);">Loading featured events...</div>
+        </div>
+    </main>
+
+    <footer style="margin-top: 4rem; padding: 2rem 0; text-align: center; color: var(--text-secondary); border-top: 1px solid var(--border-color);">
+        <p>&copy; 2026 VITConnect. Built for ASEP 3.0</p>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script>
+        async function initPage() {
+            loadFeaturedEvents();
+        }
+
+        async function loadFeaturedEvents() {
+            try {
+                const res = await fetch('/api/events?featured=true');
+                const events = await res.json();
+                const container = document.getElementById('featured-events');
+
+                if (events.length === 0) {
+                    container.innerHTML = '<p>No featured events at the moment.</p>';
+                    return;
+                }
+
+                container.innerHTML = events.map(event => `
+                    <div class="card carousel-item">
+                        <img src="${event.image}" alt="${event.title}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem;">
+                        <span style="font-size: 0.8rem; background: var(--accent); padding: 0.2rem 0.5rem; border-radius: 0.25rem;">${new Date(event.date).toLocaleDateString()}</span>
+                        <h3 style="margin: 0.5rem 0;">${event.title}</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">${event.venue}</p>
+                        <a href="/events.html?id=${event._id}" class="btn btn-outline" style="width: 100%; text-align: center;">View Details</a>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

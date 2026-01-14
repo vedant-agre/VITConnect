@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Details - VITConnect</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="logo">VITConnect</a>
+            <ul class="nav-links">
+                <!-- Populated by main.js -->
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 2rem 0;">
+        <div id="event-content" class="card" style="max-width: 800px; margin: 0 auto; padding: 0; overflow: hidden;">
+             <div style="padding: 2rem; text-align: center;">Loading...</div>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('id');
+
+        async function initPage() {
+            if (!eventId) {
+                window.location.href = '/events.html';
+                return;
+            }
+            await loadEventDetails();
+        }
+
+        async function loadEventDetails() {
+            try {
+                const res = await fetch(`/api/events/${eventId}`);
+                if (!res.ok) throw new Error('Event not found');
+                const event = await res.json();
+                renderEvent(event);
+            } catch (error) {
+                document.getElementById('event-content').innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--danger);">Event not found or error loading details.</div>';
+            }
+        }
+
+        function renderEvent(event) {
+            const container = document.getElementById('event-content');
+            
+            // Check if date passed
+            const isPast = new Date(event.date) < new Date();
+
+            container.innerHTML = `
+                <img src="${event.image}" style="width: 100%; height: 350px; object-fit: cover;">
+                <div style="padding: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <h1 style="font-size: 2rem;">${event.title}</h1>
+                        ${isPast ? '<span style="background: var(--danger); padding: 0.5rem 1rem; border-radius: 0.5rem;">Event Ended</span>' : ''}
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem; background: var(--bg-color); padding: 1rem; border-radius: 0.5rem;">
+                        <div>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Date & Time</span>
+                            <p>${new Date(event.date).toLocaleString()}</p>
+                        </div>
+                         <div>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Venue</span>
+                            <p>${event.venue}</p>
+                        </div>
+                         <div>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Organizer</span>
+                            <p>${event.organizer}</p>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 0.5rem;">About the Event</h3>
+                    <p style="color: #cbd5e1; line-height: 1.8; margin-bottom: 2rem;">
+                        ${event.description}
+                    </p>
+
+                    ${!isPast ? `<button onclick="registerForEvent('${event._id}')" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">Register Now</button>` : ''}
+                </div>
+            `;
+        }
+
+        async function registerForEvent(id) {
+            if (!user) {
+                alert('Please login to register');
+                window.location.href = '/login.html';
+                return;
+            }
+            if (user.role === 'admin') {
+                alert('Admins cannot register for events.');
+                return;
+            }
+
+            if (!confirm('Confirm registration for this event?')) return;
+
+            try {
+                const res = await fetch(`/api/events/${id}/register`, {
+                    method: 'POST'
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert('Registration Successful! Check your email/dashboard.');
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('Error registering');
+            }
+        }
+    </script>
+</body>
+</html>

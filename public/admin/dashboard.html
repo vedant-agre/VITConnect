@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - VITConnect</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 1rem;
+            height: calc(100vh - 74px);
+            position: fixed;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        .menu-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: var(--bg-color);
+            color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container" style="max-width: 100%; padding: 0 2rem;">
+            <a href="/" class="logo">VITConnect Admin</a>
+            <ul class="nav-links">
+                <li><a href="/">View Site</a></li>
+                <li><button onclick="logout()" class="btn btn-outline" style="padding: 0.4rem 1rem;">Logout</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div style="display: flex;">
+        <aside class="sidebar">
+            <div class="menu-item active" onclick="showView('events-view')">Manage Events</div>
+            <div class="menu-item" onclick="showView('create-view')">Create Event</div>
+        </aside>
+
+        <main class="main-content" style="width: 100%;">
+            <!-- Events List View -->
+            <div id="events-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h1>Event Management</h1>
+                    <button onclick="showView('create-view')" class="btn btn-primary">+ Add New Event</button>
+                </div>
+                <div class="card">
+                    <table id="events-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Date</th>
+                                <th>Featured</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Create/Edit Event View -->
+            <div id="create-view" class="hidden">
+                <h1 id="form-title" style="margin-bottom: 2rem;">Create New Event</h1>
+                <div class="card">
+                    <form id="event-form">
+                        <input type="hidden" name="id" id="event-id">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Event Title</label>
+                                <input type="text" name="title" id="e-title" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Date</label>
+                                <input type="datetime-local" name="date" id="e-date" class="form-input" required>
+                            </div>
+                        </div>
+                         <div class="grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Venue</label>
+                                <input type="text" name="venue" id="e-venue" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Organizer</label>
+                                <input type="text" name="organizer" id="e-organizer" class="form-input" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" id="e-desc" class="form-textarea" rows="4" required></textarea>
+                        </div>
+                        <div class="grid-2">
+                             <div class="form-group">
+                                <label class="form-label">Event Poster</label>
+                                <input type="file" name="image" id="e-image" class="form-input">
+                                <small style="color: var(--text-secondary)">Leave empty to keep existing if editing</small>
+                            </div>
+                             <div class="form-group">
+                                <label class="form-label">Featured Event</label>
+                                <select name="featured" id="e-featured" class="form-select">
+                                    <option value="false">No</option>
+                                    <option value="true">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="submit" class="btn btn-primary">Save Event</button>
+                            <button type="button" onclick="showView('events-view')" class="btn btn-outline">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Registrations Modal -->
+    <div id="reg-modal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2>Event Registrations</h2>
+                <button onclick="closeModal()" class="btn btn-outline" style="border: none;">✕</button>
+            </div>
+            <div id="reg-list">
+                Loading...
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        async function initPage() {
+            if (!user || user.role !== 'admin') {
+                window.location.href = '/login.html';
+                return;
+            }
+            loadEventsTable();
+        }
+
+        async function loadEventsTable() {
+            try {
+                const res = await fetch('/api/events');
+                const events = await res.json();
+                const tbody = document.querySelector('#events-table tbody');
+                
+                tbody.innerHTML = events.map(event => `
+                    <tr>
+                        <td>${event.title}</td>
+                        <td>${new Date(event.date).toLocaleDateString()}</td>
+                        <td>${event.featured ? '<span style="color: var(--success)">Yes</span>' : 'No'}</td>
+                        <td>
+                            <button onclick="editEvent('${event._id}')" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.5rem;">Edit</button>
+                            <button onclick="viewRegistrations('${event._id}')" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.5rem;">View Reg</button>
+                            <button onclick="deleteEvent('${event._id}')" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.main-content > div').forEach(div => div.classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+            
+            // Reset form if create view
+            if (viewId === 'create-view') {
+                if (document.getElementById('event-id').value === '') {
+                    document.getElementById('event-form').reset();
+                    document.getElementById('form-title').innerText = 'Create New Event';
+                }
+            } else {
+                 // Clear edit state
+                 document.getElementById('event-id').value = '';
+            }
+        }
+
+        const form = document.getElementById('event-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const id = document.getElementById('event-id').value;
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/events/${id}` : '/api/events';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    body: formData // Send as FormData for file upload
+                });
+
+                if (res.ok) {
+                    alert('Event saved successfully');
+                    showView('events-view');
+                    loadEventsTable();
+                } else {
+                    const data = await res.json();
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error saving event');
+            }
+        });
+
+        async function deleteEvent(id) {
+            if (!confirm('Are you sure you want to delete this event?')) return;
+            try {
+                await fetch(`/api/events/${id}`, { method: 'DELETE' });
+                loadEventsTable();
+            } catch (error) {
+                alert('Error deleting event');
+            }
+        }
+
+        async function editEvent(id) {
+            try {
+                const res = await fetch(`/api/events/${id}`);
+                const event = await res.json();
+                
+                document.getElementById('event-id').value = event._id;
+                document.getElementById('e-title').value = event.title;
+                document.getElementById('e-desc').value = event.description;
+                document.getElementById('e-venue').value = event.venue;
+                document.getElementById('e-organizer').value = event.organizer;
+                document.getElementById('e-featured').value = event.featured;
+                // Date formatting for datetime-local input
+                const date = new Date(event.date);
+                date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+                document.getElementById('e-date').value = date.toISOString().slice(0, 16);
+                
+                document.getElementById('form-title').innerText = 'Edit Event';
+                showView('create-view');
+            } catch (error) {
+                alert('Error loading event details');
+            }
+        }
+
+        async function viewRegistrations(id) {
+            document.getElementById('reg-modal').style.display = 'flex';
+            const list = document.getElementById('reg-list');
+            list.innerHTML = 'Loading...';
+
+            try {
+                const res = await fetch(`/api/events/${id}/registrations`);
+                const regs = await res.json();
+
+                if (regs.length === 0) {
+                    list.innerHTML = '<p>No registrations yet.</p>';
+                    return;
+                }
+
+                list.innerHTML = `
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Reg No</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${regs.map(r => `
+                                <tr>
+                                    <td>${r.student.name}</td>
+                                    <td>${r.student.regNumber}</td>
+                                    <td>${r.student.email}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                list.innerHTML = '<p>Error loading registrations</p>';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('reg-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

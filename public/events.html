@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Events - VITConnect</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="logo">VITConnect</a>
+            <ul class="nav-links">
+                <!-- Populated by main.js -->
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 2rem 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <h1>Upcoming Events</h1>
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" id="search-input" placeholder="Search events..." class="form-input" style="width: 250px;">
+                <!-- <button class="btn btn-primary" onclick="searchEvents()">Search</button> -->
+            </div>
+        </div>
+
+        <div id="events-grid" class="grid-3">
+            <!-- Populated by JS -->
+            <div style="color: var(--text-secondary);">Loading events...</div>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        const searchInput = document.getElementById('search-input');
+        let allEvents = [];
+
+        async function initPage() {
+            await loadEvents();
+        }
+
+        async function loadEvents() {
+            try {
+                const res = await fetch('/api/events');
+                allEvents = await res.json();
+                renderEvents(allEvents);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('events-grid').innerHTML = '<p>Error loading events</p>';
+            }
+        }
+
+        function renderEvents(events) {
+            const container = document.getElementById('events-grid');
+            
+            if (events.length === 0) {
+                container.innerHTML = '<p>No events found.</p>';
+                return;
+            }
+
+            container.innerHTML = events.map(event => `
+                <div class="card">
+                    <img src="${event.image}" alt="${event.title}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <h3 style="font-size: 1.25rem;">${event.title}</h3>
+                        ${event.featured ? '<span style="background: var(--accent); font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 4px;">Featured</span>' : ''}
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+                        <p>📅 ${new Date(event.date).toLocaleDateString()} &bull; 📍 ${event.venue}</p>
+                    </div>
+                    <p style="color: #cbd5e1; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        ${event.description}
+                    </p>
+                    <a href="/event.html?id=${event._id}" class="btn btn-outline" style="width: 100%; text-align: center;">View & Register</a>
+                </div>
+            `).join('');
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allEvents.filter(ev => 
+                ev.title.toLowerCase().includes(term) || 
+                ev.venue.toLowerCase().includes(term)
+            );
+            renderEvents(filtered);
+        });
+    </script>
+</body>
+</html>
